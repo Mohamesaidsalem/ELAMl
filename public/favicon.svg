@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <path d="M6 31L32 8l26 23" stroke="#0b3b6b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M46 14v-5h6v11" stroke="#0b3b6b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -6,3 +7,11 @@
   <circle cx="49" cy="50" r="8" fill="#22b573" stroke="#fff" stroke-width="2.5"/>
   <path d="M49 46v8M45 50h8" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
 </svg>
+=======
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<rect width="64" height="64" rx="16" fill="#075985"/>
+<path d="M32 8 50 15v14c0 12-7 22-18 27C21 51 14 41 14 29V15l18-7Z" fill="none" stroke="white" stroke-width="4"/>
+<path d="M32 23v17M23.5 31.5h17" stroke="#16b98e" stroke-width="4" stroke-linecap="round"/>
+<circle cx="32" cy="45" r="4" fill="#16b98e"/>
+</svg>
+>>>>>>> 15b459b979566da67b144f3c419af12aa234dc04
