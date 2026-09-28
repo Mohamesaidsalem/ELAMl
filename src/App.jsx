@@ -220,6 +220,14 @@ function App() {
         </section>
       </main>
 
+      <div className="mobile-action-bar">
+        <button onClick={() => nav("home")}><Home/><span>الرئيسية</span></button>
+        <button onClick={() => nav("services")}><Stethoscope/><span>خدماتنا</span></button>
+        <button className="mobile-action-main" onClick={() => nav("booking")}><span><CalendarIcon/></span><b>احجز</b></button>
+        <button onClick={() => wa()}><MessageCircle/><span>واتساب</span></button>
+        <a href={`tel:${PHONE}`}><Phone/><span>اتصال</span></a>
+      </div>
+
       <footer className="footer">
         <div className="container footer-grid">
           <div><Logo dark/><p>رعايتك في بيتك... أمان لنا قبل أن تكون خدمة.</p></div>
