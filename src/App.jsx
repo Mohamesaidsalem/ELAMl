@@ -1,920 +1,921 @@
 import { useEffect, useState } from "react";
 
 /* ============================================================
-مركز الأمل للتمريض المنزلي — Landing Page (React, single file)
+   مركز الأمل للتمريض المنزلي — Landing Page (React, single file)
+   - RTL / Arabic (خط Cairo)
+   - Responsive: موبايل + تابلت + كمبيوتر
+   - لا يحتاج أي مكتبة إضافية (CSS داخل الملف)
+   ============================================================ */
 
-RTL / Arabic (خط Cairo)
-Responsive: موبايل + تابلت + كمبيوتر
-لا يحتاج أي مكتبة إضافية (CSS داخل الملف)
-============================================================ */
 const PHONE_DISPLAY = "+966 59 606 3710";
 const PHONE_TEL = "+966596063710";
 const WA_NUMBER = "966596063710";
 const waLink = (text = "") =>
-https://wa.me/${WA_NUMBER}${text ? ?text=${encodeURIComponent(text)} : ""};
+  `https://wa.me/${WA_NUMBER}${text ? `?text=${encodeURIComponent(text)}` : ""}`;
 
 /* ---------- الصور ----------
-ضع صورك في public/images/ بنفس الأسماء أو غيّر المسارات هنا.
-لو الصورة مش موجودة يظهر بديل لوني تلقائيًا بدل صورة مكسورة. */
+   ضع صورك في public/images/ بنفس الأسماء أو غيّر المسارات هنا.
+   لو الصورة مش موجودة يظهر بديل لوني تلقائيًا بدل صورة مكسورة. */
 const IMAGES = {
-makkah: "/images/makkah-skyline.jpg",
-booking: "/images/booking-nurse.jpg",
-why: "/images/caring-hands.jpg",
-homeNursing: "/images/home-nursing.jpg",
-postOp: "/images/post-op.jpg",
-elderly: "/images/elderly-care.jpg",
-injections: "/images/injections-iv.jpg",
-wounds: "/images/wound-care.jpg",
-makkahCity: "/images/city-makkah.jpg",
-jeddah: "/images/city-jeddah.jpg",
-taif: "/images/city-taif.jpg",
+  makkah: "/images/makkah-skyline.jpg",
+  booking: "/images/booking-nurse.jpg",
+  why: "/images/caring-hands.jpg",
+  homeNursing: "/images/home-nursing.jpg",
+  postOp: "/images/post-op.jpg",
+  elderly: "/images/elderly-care.jpg",
+  injections: "/images/injections-iv.jpg",
+  wounds: "/images/wound-care.jpg",
+  makkahCity: "/images/city-makkah.jpg",
+  jeddah: "/images/city-jeddah.jpg",
+  taif: "/images/city-taif.jpg",
 };
 
 const NAV = [
-{ label: "الرئيسية", to: "/" },
-{ label: "خدماتنا", to: "/services" },
-{ label: "من نحن", to: "/about" },
-{ label: "آراء العملاء", to: "/reviews" },
-{ label: "الأسئلة الشائعة", to: "/faq" },
-{ label: "تواصل معنا", to: "/contact" },
+  { label: "الرئيسية", to: "/" },
+  { label: "خدماتنا", to: "/services" },
+  { label: "من نحن", to: "/about" },
+  { label: "آراء العملاء", to: "/reviews" },
+  { label: "الأسئلة الشائعة", to: "/faq" },
+  { label: "تواصل معنا", to: "/contact" },
 ];
 
 const SERVICES = [
-{
-id: "nursing", title: "التمريض المنزلي", desc: "رعاية شاملة للحالات المزمنة واحتياجاتك اليومية", img: IMAGES.homeNursing, icon: "🩺",
-long: "رعاية تمريضية شاملة في منزلك للحالات المزمنة واحتياجاتك اليومية، بإشراف فريق مؤهل يتابع حالتك بانتظام.",
-includes: ["قياس العلامات الحيوية ومتابعتها", "إعطاء الأدوية حسب الوصفة الطبية", "متابعة الحالات المزمنة كالسكري والضغط", "المساعدة في العناية الشخصية اليومية", "تثقيف المريض والأسرة بطريقة العناية الصحيحة"],
-},
-{
-id: "post-op", title: "رعاية ما بعد العمليات", desc: "متابعة دقيقة لضمان الشفاء السريع والأمن", img: IMAGES.postOp, icon: "🏥",
-long: "متابعة دقيقة بعد الخروج من المستشفى لضمان شفاء سريع وآمن، وسط راحة المنزل وأهله.",
-includes: ["متابعة الحالة بعد الخروج من المستشفى", "العناية بمكان العملية وتغيير الضمادات", "متابعة الألم والأدوية", "المساعدة على الحركة الآمنة", "إبلاغ الأسرة بأي ملاحظة تستدعي مراجعة الطبيب"],
-},
-{
-id: "elderly", title: "رعاية كبار السن", desc: "متابعة الحالة الصحية وتقديم الرعاية اليومية", img: IMAGES.elderly, icon: "👴",
-long: "رعاية يومية تحفظ كرامة كبار السن وراحتهم، مع متابعة صحية منتظمة واهتمام إنساني.",
-includes: ["متابعة الحالة الصحية اليومية", "المساعدة في النظافة الشخصية والحركة", "تنظيم مواعيد الأدوية", "الوقاية من السقوط وقرحات الفراش", "الاهتمام والمرافقة"],
-},
-{
-id: "injections", title: "الحقن والمحاليل", desc: "حقن عضلية ووريدية وإعطاء المحاليل الوريدية", img: IMAGES.injections, icon: "💉",
-long: "حقن ومحاليل تُعطى في المنزل على يد ممرض مؤهل، بأدوات معقمة وبناءً على وصفة طبية سارية.",
-includes: ["حقن عضلية", "حقن وريدية", "إعطاء المحاليل الوريدية", "حقن تحت الجلد مثل الأنسولين", "مراقبة الحالة أثناء الجلسة وبعدها"],
-},
-{
-id: "wounds", title: "تغيير الجروح والعناية بها", desc: "تعقيم الجروح وتغيير الضمادات بأعلى معايير السلامة", img: IMAGES.wounds, icon: "🩹",
-long: "تعقيم الجروح وتغيير الضمادات بأعلى معايير السلامة لتسريع الالتئام وتقليل خطر العدوى.",
-includes: ["تنظيف الجرح وتعقيمه", "تغيير الضمادات بانتظام", "متابعة علامات الالتهاب", "العناية بجروح ما بعد العمليات", "تعليمات العناية بالجرح بين الزيارات"],
-},
+  {
+    id: "nursing", title: "التمريض المنزلي", desc: "رعاية شاملة للحالات المزمنة واحتياجاتك اليومية", img: IMAGES.homeNursing, icon: "🩺",
+    long: "رعاية تمريضية شاملة في منزلك للحالات المزمنة واحتياجاتك اليومية، بإشراف فريق مؤهل يتابع حالتك بانتظام.",
+    includes: ["قياس العلامات الحيوية ومتابعتها", "إعطاء الأدوية حسب الوصفة الطبية", "متابعة الحالات المزمنة كالسكري والضغط", "المساعدة في العناية الشخصية اليومية", "تثقيف المريض والأسرة بطريقة العناية الصحيحة"],
+  },
+  {
+    id: "post-op", title: "رعاية ما بعد العمليات", desc: "متابعة دقيقة لضمان الشفاء السريع والأمن", img: IMAGES.postOp, icon: "🏥",
+    long: "متابعة دقيقة بعد الخروج من المستشفى لضمان شفاء سريع وآمن، وسط راحة المنزل وأهله.",
+    includes: ["متابعة الحالة بعد الخروج من المستشفى", "العناية بمكان العملية وتغيير الضمادات", "متابعة الألم والأدوية", "المساعدة على الحركة الآمنة", "إبلاغ الأسرة بأي ملاحظة تستدعي مراجعة الطبيب"],
+  },
+  {
+    id: "elderly", title: "رعاية كبار السن", desc: "متابعة الحالة الصحية وتقديم الرعاية اليومية", img: IMAGES.elderly, icon: "👴",
+    long: "رعاية يومية تحفظ كرامة كبار السن وراحتهم، مع متابعة صحية منتظمة واهتمام إنساني.",
+    includes: ["متابعة الحالة الصحية اليومية", "المساعدة في النظافة الشخصية والحركة", "تنظيم مواعيد الأدوية", "الوقاية من السقوط وقرحات الفراش", "الاهتمام والمرافقة"],
+  },
+  {
+    id: "injections", title: "الحقن والمحاليل", desc: "حقن عضلية ووريدية وإعطاء المحاليل الوريدية", img: IMAGES.injections, icon: "💉",
+    long: "حقن ومحاليل تُعطى في المنزل على يد ممرض مؤهل، بأدوات معقمة وبناءً على وصفة طبية سارية.",
+    includes: ["حقن عضلية", "حقن وريدية", "إعطاء المحاليل الوريدية", "حقن تحت الجلد مثل الأنسولين", "مراقبة الحالة أثناء الجلسة وبعدها"],
+  },
+  {
+    id: "wounds", title: "تغيير الجروح والعناية بها", desc: "تعقيم الجروح وتغيير الضمادات بأعلى معايير السلامة", img: IMAGES.wounds, icon: "🩹",
+    long: "تعقيم الجروح وتغيير الضمادات بأعلى معايير السلامة لتسريع الالتئام وتقليل خطر العدوى.",
+    includes: ["تنظيف الجرح وتعقيمه", "تغيير الضمادات بانتظام", "متابعة علامات الالتهاب", "العناية بجروح ما بعد العمليات", "تعليمات العناية بالجرح بين الزيارات"],
+  },
 ];
 
 const STEPS = [
-{ t: "تواصل معنا", d: "أرسل طلبك على واتساب أو من نموذج الحجز واذكر الخدمة." },
-{ t: "نؤكد التفاصيل", d: "نراجع حالتك ونؤكد الموعد والسعر قبل الزيارة." },
-{ t: "زيارة الممرض", d: "يصل ممرض مؤهل إلى منزلك في الموعد المتفق عليه." },
-{ t: "المتابعة", d: "نتابع حالتك ونرتب الزيارات التالية عند الحاجة." },
+  { t: "تواصل معنا", d: "أرسل طلبك على واتساب أو من نموذج الحجز واذكر الخدمة." },
+  { t: "نؤكد التفاصيل", d: "نراجع حالتك ونؤكد الموعد والسعر قبل الزيارة." },
+  { t: "زيارة الممرض", d: "يصل ممرض مؤهل إلى منزلك في الموعد المتفق عليه." },
+  { t: "المتابعة", d: "نتابع حالتك ونرتب الزيارات التالية عند الحاجة." },
 ];
 
 const TOP_FEATURES = [
-{ icon: "shield", text: "جودة عالية في الخدمة" },
-{ icon: "clock", text: "متوفر على مدار الساعة" },
-{ icon: "users", text: "فريق تمريضي محترف" },
-{ icon: "pin", text: "بجميع مناطق المملكة" },
+  { icon: "shield", text: "جودة عالية في الخدمة" },
+  { icon: "clock", text: "متوفر على مدار الساعة" },
+  { icon: "users", text: "فريق تمريضي محترف" },
+  { icon: "pin", text: "بجميع مناطق المملكة" },
 ];
 
 const WHY = [
-{ icon: "user", title: "فريق مؤهل", sub: "ومعتمد" },
-{ icon: "clock", title: "استجابة سريعة", sub: "وتواصل دائم" },
-{ icon: "tag", title: "أسعار مناسبة", sub: "وواضحة" },
-{ icon: "heart", title: "رعاية إنسانية", sub: "بكل اهتمام" },
+  { icon: "user", title: "فريق مؤهل", sub: "ومعتمد" },
+  { icon: "clock", title: "استجابة سريعة", sub: "وتواصل دائم" },
+  { icon: "tag", title: "أسعار مناسبة", sub: "وواضحة" },
+  { icon: "heart", title: "رعاية إنسانية", sub: "بكل اهتمام" },
 ];
 
 const REVIEWS = [
-{ name: "سارة الزهراني", text: "ممتنون لكم على رعايتكم، أمي في فترة الشفاء.", stars: 5 },
-{ name: "محمد العتيبي", text: "تعامل راقٍ واهتمام بالتفاصيل، أنصح بهم بشدة.", stars: 5 },
-{ name: "أم أحمد", text: "خدمة ممتازة وفريق متعاون جدًا، تمنيت ويحبنا من البداية.", stars: 5 },
-{ name: "خالد الغامدي", text: "وصلوا في الموعد وتعاملوا مع الوالد بلطف كبير.", stars: 5 },
-{ name: "نورة القرني", text: "خدمة تغيير الجروح كانت احترافية ونظيفة جدًا.", stars: 5 },
-{ name: "عبدالله الحربي", text: "سرعة في الاستجابة وأسعار واضحة من أول اتصال.", stars: 5 },
+  { name: "سارة الزهراني", text: "ممتنون لكم على رعايتكم، أمي في فترة الشفاء.", stars: 5 },
+  { name: "محمد العتيبي", text: "تعامل راقٍ واهتمام بالتفاصيل، أنصح بهم بشدة.", stars: 5 },
+  { name: "أم أحمد", text: "خدمة ممتازة وفريق متعاون جدًا، تمنيت ويحبنا من البداية.", stars: 5 },
+  { name: "خالد الغامدي", text: "وصلوا في الموعد وتعاملوا مع الوالد بلطف كبير.", stars: 5 },
+  { name: "نورة القرني", text: "خدمة تغيير الجروح كانت احترافية ونظيفة جدًا.", stars: 5 },
+  { name: "عبدالله الحربي", text: "سرعة في الاستجابة وأسعار واضحة من أول اتصال.", stars: 5 },
 ];
 
 const AREAS = [
-{ name: "مكة المكرمة", img: IMAGES.makkahCity },
-{ name: "جدة", img: IMAGES.jeddah },
-{ name: "الطائف", img: IMAGES.taif },
+  { name: "مكة المكرمة", img: IMAGES.makkahCity },
+  { name: "جدة", img: IMAGES.jeddah },
+  { name: "الطائف", img: IMAGES.taif },
 ];
 
 const FAQ = [
-{ q: "هل الخدمة متوفرة في جميع مناطق المملكة؟", a: "نخدم مكة المكرمة وجدة والطائف، ونصل إلى باقي مناطق المملكة حسب التوفر. تواصل معنا على واتساب لتأكيد منطقتك." },
-{ q: "كم تكلفة الزيارة المنزلية؟", a: "تختلف التكلفة حسب نوع الخدمة ومدة الزيارة. أرسل لنا طلبك وسنرد بالسعر الواضح قبل الزيارة." },
-{ q: "هل يمكن حجز زيارة في نفس اليوم؟", a: "نعم، حسب توفر الفريق في منطقتك. اتصل بنا أو راسلنا على واتساب لتأكيد أقرب موعد." },
-{ q: "ما هي طرق الدفع المتوفرة؟", a: "نقبل الدفع النقدي والتحويل البنكي. سنوضح لك التفاصيل عند تأكيد الحجز." },
-{ q: "كيف أحجز زيارة؟", a: "من نموذج الحجز في الموقع أو بمراسلتنا مباشرة على واتساب. نؤكد معك الموعد والسعر قبل وصول الممرض." },
-{ q: "هل يمكن طلب الخدمة لأكثر من زيارة؟", a: "نعم، يمكن ترتيب زيارات متكررة يوميًا أو أسبوعيًا حسب حالة المريض وتوصية الطبيب." },
+  { q: "هل الخدمة متوفرة في جميع مناطق المملكة؟", a: "نخدم مكة المكرمة وجدة والطائف، ونصل إلى باقي مناطق المملكة حسب التوفر. تواصل معنا على واتساب لتأكيد منطقتك." },
+  { q: "كم تكلفة الزيارة المنزلية؟", a: "تختلف التكلفة حسب نوع الخدمة ومدة الزيارة. أرسل لنا طلبك وسنرد بالسعر الواضح قبل الزيارة." },
+  { q: "هل يمكن حجز زيارة في نفس اليوم؟", a: "نعم، حسب توفر الفريق في منطقتك. اتصل بنا أو راسلنا على واتساب لتأكيد أقرب موعد." },
+  { q: "ما هي طرق الدفع المتوفرة؟", a: "نقبل الدفع النقدي والتحويل البنكي. سنوضح لك التفاصيل عند تأكيد الحجز." },
+  { q: "كيف أحجز زيارة؟", a: "من نموذج الحجز في الموقع أو بمراسلتنا مباشرة على واتساب. نؤكد معك الموعد والسعر قبل وصول الممرض." },
+  { q: "هل يمكن طلب الخدمة لأكثر من زيارة؟", a: "نعم، يمكن ترتيب زيارات متكررة يوميًا أو أسبوعيًا حسب حالة المريض وتوصية الطبيب." },
 ];
 
 const SERVICE_OPTIONS = [
-"التمريض المنزلي",
-"رعاية ما بعد العمليات",
-"رعاية كبار السن",
-"الحقن والمحاليل",
-"تغيير الجروح والعناية بها",
-"زيارة طارئة",
+  "التمريض المنزلي",
+  "رعاية ما بعد العمليات",
+  "رعاية كبار السن",
+  "الحقن والمحاليل",
+  "تغيير الجروح والعناية بها",
+  "زيارة طارئة",
 ];
 
 /* ---------- الأيقونات ---------- */
 const ICONS = {
-shield: <><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" /><path d="M9 12l2 2 4-4" /></>,
-clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
-users: <><circle cx="9" cy="9" r="3.2" /><path d="M3.5 19c.5-3.2 2.7-5 5.5-5s5 1.8 5.5 5" /><circle cx="17" cy="10" r="2.4" /><path d="M16 14.3c2.5.2 4 1.7 4.5 4.2" /></>,
-pin: <><path d="M12 21s7-6.2 7-11.5A7 7 0 005 9.5C5 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></>,
-user: <><circle cx="12" cy="8" r="4" /><path d="M4.5 20c.8-4 3.8-6 7.5-6s6.7 2 7.5 6" /></>,
-tag: <><path d="M3 12V4h8l10 10-8 8L3 12z" /><circle cx="7.5" cy="8.5" r="1.3" /></>,
-heart: <path d="M12 20s-8-4.7-8-10.5A4.5 4.5 0 0112 7a4.5 4.5 0 018 2.5C20 15.300 12 20 12 20z" />,
-calendar: <><rect x="3.5" y="5" width="17" height="15" rx="2.5" /><path d="M3.5 10h17M8 3v4M16 3v4" /></>,
-phone: <path d="M5 4h4l2 5-2.500 1.500a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z" />,
-send: <path d="M21 3L3 10.500l7 2.500 2.500 7L21 3zM10 13l11-10" />,
-car: <><path d="M4 16v-4l2-5h12l2 5v4" /><path d="M3 16h18v2H3z" /><circle cx="7.500" cy="16" r="1" /><circle cx="16.500" cy="16" r="1" /></>,
-help: <><circle cx="12" cy="12" r="9" /><path d="M9.500 9.500a2.500 2.500 0 015 .5c0 1.700-2.500 2-2.500 3.500M12 17h.01" /></>,
-chat: <><rect x="4" y="4" width="16" height="12" rx="2" /><path d="M9 20l3-4M8 9h8M8 12h5" /></>,
-plus: <path d="M12 5v14M5 12h14" />,
-minus: <path d="M5 12h14" />,
-menu: <path d="M4 7h16M4 12h16M4 17h16" />,
-close: <path d="M6 6l12 12M18 6L6 18" />,
-chevron: <path d="M6 9l6 6 6-6" />,
-arrow: <path d="M19 12H5M11 6l-6 6 6 6" />,
-globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" /></>,
-field: <><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M9 12h6" /></>,
+  shield: <><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" /><path d="M9 12l2 2 4-4" /></>,
+  clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+  users: <><circle cx="9" cy="9" r="3.2" /><path d="M3.5 19c.5-3.2 2.7-5 5.5-5s5 1.8 5.5 5" /><circle cx="17" cy="10" r="2.4" /><path d="M16 14.3c2.5.2 4 1.7 4.5 4.2" /></>,
+  pin: <><path d="M12 21s7-6.2 7-11.5A7 7 0 005 9.5C5 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></>,
+  user: <><circle cx="12" cy="8" r="4" /><path d="M4.5 20c.8-4 3.8-6 7.5-6s6.7 2 7.5 6" /></>,
+  tag: <><path d="M3 12V4h8l10 10-8 8L3 12z" /><circle cx="7.5" cy="8.5" r="1.3" /></>,
+  heart: <path d="M12 20s-8-4.7-8-10.5A4.5 4.5 0 0112 7a4.5 4.5 0 018 2.5C20 15.300 12 20 12 20z" />,
+  calendar: <><rect x="3.5" y="5" width="17" height="15" rx="2.5" /><path d="M3.5 10h17M8 3v4M16 3v4" /></>,
+  phone: <path d="M5 4h4l2 5-2.500 1.500a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z" />,
+  send: <path d="M21 3L3 10.500l7 2.500 2.500 7L21 3zM10 13l11-10" />,
+  car: <><path d="M4 16v-4l2-5h12l2 5v4" /><path d="M3 16h18v2H3z" /><circle cx="7.500" cy="16" r="1" /><circle cx="16.500" cy="16" r="1" /></>,
+  help: <><circle cx="12" cy="12" r="9" /><path d="M9.500 9.500a2.500 2.500 0 015 .5c0 1.700-2.500 2-2.500 3.500M12 17h.01" /></>,
+  chat: <><rect x="4" y="4" width="16" height="12" rx="2" /><path d="M9 20l3-4M8 9h8M8 12h5" /></>,
+  plus: <path d="M12 5v14M5 12h14" />,
+  minus: <path d="M5 12h14" />,
+  menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+  close: <path d="M6 6l12 12M18 6L6 18" />,
+  chevron: <path d="M6 9l6 6 6-6" />,
+  arrow: <path d="M19 12H5M11 6l-6 6 6 6" />,
+  globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" /></>,
+  field: <><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M9 12h6" /></>,
 };
 
 function Icon({ name, size = 22, stroke = 1.8, className = "" }) {
-return (
-<svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" >
-{ICONS[name]}
-</svg>
-);
+  return (
+    <svg
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={stroke}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {ICONS[name]}
+    </svg>
+  );
 }
 
 function WhatsAppIcon({ size = 26 }) {
-return (
-<svg width={size} height={size} viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
-<path d="M16.040 3C8.850 3 3 8.830 3 16c0 2.300.610 4.540 1.770 6.520L3 29l6.640-1.740A13.040 13.040 0 0016.040 29C23.230 29 29 23.170 29 16S23.230 3 16.040 3zm0 23.700c-1.960 0-3.870-.53-5.540-1.520l-.4-.24-3.940 1.030 1.050-3.840-.26-.4A10.650 10.650 0 015.350 16c0-5.900 4.790-10.700 10.690-10.700 5.890 0 10.660 4.800 10.660 10.700 0 5.890-4.770 10.700-10.660 10.700zm5.850-8c-.32-.16-1.900-.94-2.200-1.050-.29-.11-.5-.16-.72.160-.21.320-.83 1.050-1.020 1.260-.19.210-.37.240-.69.080-.32-.16-1.360-.5-2.590-1.600-.96-.85-1.600-1.900-1.790-2.220-.19-.32-.02-.5.140-.66.140-.14.320-.37.480-.56.160-.19.210-.32.320-.53.110-.21.050-.4-.03-.56-.08-.16-.72-1.740-.99-2.380-.26-.62-.52-.54-.72-.55h-.61c-.21 0-.56.080-.85.400-.29.320-1.110 1.090-1.110 2.660s1.140 3.090 1.300 3.300c.16.210 2.240 3.420 5.420 4.800.76.330 1.350.520 1.810.670.76.240 1.450.210 2 .13.610-.09 1.900-.78 2.170-1.530.27-.75.270-1.390.19-1.530-.08-.13-.29-.21-.61-.37z" />
-</svg>
-);
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+      <path d="M16.040 3C8.850 3 3 8.830 3 16c0 2.300.610 4.540 1.770 6.520L3 29l6.640-1.740A13.040 13.040 0 0016.040 29C23.230 29 29 23.170 29 16S23.230 3 16.040 3zm0 23.700c-1.960 0-3.870-.53-5.540-1.520l-.4-.24-3.940 1.030 1.050-3.840-.26-.4A10.650 10.650 0 015.350 16c0-5.900 4.790-10.700 10.690-10.700 5.890 0 10.660 4.800 10.660 10.700 0 5.890-4.770 10.700-10.660 10.700zm5.850-8c-.32-.16-1.900-.94-2.200-1.050-.29-.11-.5-.16-.72.160-.21.320-.83 1.050-1.020 1.260-.19.210-.37.240-.69.080-.32-.16-1.360-.5-2.590-1.600-.96-.85-1.600-1.900-1.790-2.220-.19-.32-.02-.5.140-.66.140-.14.320-.37.480-.56.160-.19.210-.32.320-.53.110-.21.050-.4-.03-.56-.08-.16-.72-1.740-.99-2.380-.26-.62-.52-.54-.72-.55h-.61c-.21 0-.56.080-.85.400-.29.320-1.110 1.090-1.110 2.660s1.140 3.090 1.300 3.300c.16.210 2.240 3.420 5.420 4.800.76.330 1.350.520 1.810.670.76.240 1.450.210 2 .13.610-.09 1.900-.78 2.170-1.530.27-.75.270-1.390.19-1.530-.08-.13-.29-.21-.61-.37z" />
+    </svg>
+  );
 }
 
-/* ---------- اللوجو ---------- /
+/* ---------- اللوجو ---------- */
 function Logo({ size = 64, light = false }) {
-return (
-<span className="logo" aria-label="مركز الأمل للتمريض المنزلي">
-<svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
-{/ السقف /}
-<path d="M6 31L32 8l26 23" stroke={light ? "#ffffff" : "#0b3b6b"} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
-<path d="M46 14v-5h6v11" stroke={light ? "#ffffff" : "#0b3b6b"} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-{/ الرأس /}
-<circle cx="32" cy="27" r="5.500" fill="#0fa3a8" />
-{/ القلب / الأيدي الحاضنة /}
-<path d="M32 55C19 47 16 37 24 35c4-1 8 1.500 8 4.500 0-3 4-5.500 8-4.500 8 2 5 12-8 20z" fill="#1d6fd1" />
-<path d="M22 42c3 5 7 8 10 10" stroke="#fff" strokeWidth="2" strokeLinecap="round" opacity=".7" />
-{/ شارة الطبي */}
-<circle cx="49" cy="50" r="8" fill="#22b573" stroke={light ? "#0b2a4a" : "#fff"} strokeWidth="2.500" />
-<path d="M49 46v8M45 50h8" stroke="#fff" strokeWidth="2.400" strokeLinecap="round" />
-</svg>
-<span className="logo-text">
-<b style={{ color: light ? "#fff" : "#0b3b6b" }}>مركز الأمل</b>
-<span style={{ color: light ? "#e6f2fb" : "#0b3b6b" }}>للتمريض المنزلي</span>
-<em>رعايتك في بيتك .. أمان لنا</em>
-</span>
-</span>
-);
+  return (
+    <span className="logo" aria-label="مركز الأمل للتمريض المنزلي">
+      <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+        {/* السقف */}
+        <path d="M6 31L32 8l26 23" stroke={light ? "#ffffff" : "#0b3b6b"} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M46 14v-5h6v11" stroke={light ? "#ffffff" : "#0b3b6b"} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+        {/* الرأس */}
+        <circle cx="32" cy="27" r="5.500" fill="#0fa3a8" />
+        {/* القلب / الأيدي الحاضنة */}
+        <path d="M32 55C19 47 16 37 24 35c4-1 8 1.500 8 4.500 0-3 4-5.500 8-4.500 8 2 5 12-8 20z" fill="#1d6fd1" />
+        <path d="M22 42c3 5 7 8 10 10" stroke="#fff" strokeWidth="2" strokeLinecap="round" opacity=".7" />
+        {/* شارة الطبي */}
+        <circle cx="49" cy="50" r="8" fill="#22b573" stroke={light ? "#0b2a4a" : "#fff"} strokeWidth="2.500" />
+        <path d="M49 46v8M45 50h8" stroke="#fff" strokeWidth="2.400" strokeLinecap="round" />
+      </svg>
+      <span className="logo-text">
+        <b style={{ color: light ? "#fff" : "#0b3b6b" }}>مركز الأمل</b>
+        <span style={{ color: light ? "#e6f2fb" : "#0b3b6b" }}>للتمريض المنزلي</span>
+        <em>رعايتك في بيتك .. أمان لنا</em>
+      </span>
+    </span>
+  );
 }
 
 /* ---------- صورة مع بديل لوني ---------- */
 function Photo({ src, alt, className = "", icon = "🩺", bare = false }) {
-const [failed, setFailed] = useState(false);
-if (failed) {
-if (bare) return null;
-return (
-<div className={photo-fallback ${className}} role="img" aria-label={alt}>
-<span>{icon}</span>
-</div>
-);
-}
-return <img className={className} src={src} alt={alt} loading="lazy" onError={() => setFailed(true)} />;
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    if (bare) return null;
+    return (
+      <div className={`photo-fallback ${className}`} role="img" aria-label={alt}>
+        <span>{icon}</span>
+      </div>
+    );
+  }
+  return <img className={className} src={src} alt={alt} loading="lazy" onError={() => setFailed(true)} />;
 }
 
 /* ---------- الراوتر (بدون مكتبات): #/services ... ---------- */
 function useRoute() {
-const get = () => {
-const h = typeof window === "undefined" ? "" : window.location.hash.replace(/^#/, "");
-return h.startsWith("/") ? h : "/";
-};
-const [route, setRoute] = useState(get);
-useEffect(() => {
-const onHash = () => {
-setRoute(get());
-window.scrollTo({ top: 0 });
-};
-window.addEventListener("hashchange", onHash);
-return () => window.removeEventListener("hashchange", onHash);
-}, []);
-return route;
+  const get = () => {
+    const h = typeof window === "undefined" ? "" : window.location.hash.replace(/^#/, "");
+    return h.startsWith("/") ? h : "/";
+  };
+  const [route, setRoute] = useState(get);
+  useEffect(() => {
+    const onHash = () => {
+      setRoute(get());
+      window.scrollTo({ top: 0 });
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+  return route;
 }
 
 /* ---------- مكونات مشتركة ---------- */
 function PageHead({ title, sub, crumbs = [] }) {
-return (
-<section className="page-head">
-<div className="container">
-<nav className="crumbs" aria-label="مسار الصفحة">
-<a href="#/">الرئيسية</a>
-{crumbs.map((c) => (
-<span key={c.label}>
-<i>/</i>
-{c.to ? <a href={c.to}>{c.label}</a> : c.label}
-</span>
-))}
-</nav>
-<h1>{title}</h1>
-{sub && <p>{sub}</p>}
-</div>
-</section>
-);
+  return (
+    <section className="page-head">
+      <div className="container">
+        <nav className="crumbs" aria-label="مسار الصفحة">
+          <a href="#/">الرئيسية</a>
+          {crumbs.map((c) => (
+            <span key={c.label}>
+              <i>/</i>
+              {c.to ? <a href={c.to}>{c.label}</a> : c.label}
+            </span>
+          ))}
+        </nav>
+        <h1>{title}</h1>
+        {sub && <p>{sub}</p>}
+      </div>
+    </section>
+  );
 }
 
 function CtaBand({ text = "جاهز لحجز زيارتك؟ فريقنا بانتظارك" }) {
-return (
-<section className="cta-band">
-<div className="container cta-in">
-<h2>{text}</h2>
-<div className="cta-actions">
-<a href="#/contact" className="btn-primary light">
-<Icon name="calendar" size={20} /> احجز زيارة الآن
-</a>
-<a href={waLink()} target="_blank" rel="noopener noreferrer" className="btn-wa">
-<WhatsAppIcon size={22} /> واتساب
-</a>
-</div>
-</div>
-</section>
-);
+  return (
+    <section className="cta-band">
+      <div className="container cta-in">
+        <h2>{text}</h2>
+        <div className="cta-actions">
+          <a href="#/contact" className="btn-primary light">
+            <Icon name="calendar" size={20} /> احجز زيارة الآن
+          </a>
+          <a href={waLink()} target="_blank" rel="noopener noreferrer" className="btn-wa">
+            <WhatsAppIcon size={22} /> واتساب
+          </a>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function Stars({ n }) {
-return <div className="stars" aria-label={${n} من 5}>{"★".repeat(n)}</div>;
+  return <div className="stars" aria-label={`${n} من 5`}>{"★".repeat(n)}</div>;
 }
 
 function ReviewCard({ r }) {
-return (
-<figure className="rv">
-<figcaption>
-<span className="rv-ic"><Icon name="user" size={18} /></span>
-<b>{r.name}</b>
-</figcaption>
-<Stars n={r.stars} />
-<blockquote>{r.text}</blockquote>
-</figure>
-);
+  return (
+    <figure className="rv">
+      <figcaption>
+        <span className="rv-ic"><Icon name="user" size={18} /></span>
+        <b>{r.name}</b>
+      </figcaption>
+      <Stars n={r.stars} />
+      <blockquote>{r.text}</blockquote>
+    </figure>
+  );
 }
 
 function FaqList({ items }) {
-const [open, setOpen] = useState(0);
-return (
-<>
-{items.map((f, i) => (
-<div key={f.q} className={faq-item ${open === i ? "open" : ""}}>
-<button onClick={() => setOpen(open === i ? -1 : i)} aria-expanded={open === i}>
-<span>{f.q}</span>
-<Icon name={open === i ? "minus" : "plus"} size={16} stroke={2.4} />
-</button>
-{open === i && <p>{f.a}</p>}
-</div>
-))}
-</>
-);
+  const [open, setOpen] = useState(0);
+  return (
+    <>
+      {items.map((f, i) => (
+        <div key={f.q} className={`faq-item ${open === i ? "open" : ""}`}>
+          <button onClick={() => setOpen(open === i ? -1 : i)} aria-expanded={open === i}>
+            <span>{f.q}</span>
+            <Icon name={open === i ? "minus" : "plus"} size={16} stroke={2.4} />
+          </button>
+          {open === i && <p>{f.a}</p>}
+        </div>
+      ))}
+    </>
+  );
 }
 
 function ServiceCard({ s }) {
-return (
-<article className="svc">
-<Photo src={s.img} alt={s.title} className="svc-img" icon={s.icon} />
-<h3>{s.title}</h3>
-<p>{s.desc}</p>
-<a href={#/services/${s.id}} className="more">
-<Icon name="arrow" size={14} stroke={2.4} /> المزيد
-</a>
-</article>
-);
+  return (
+    <article className="svc">
+      <Photo src={s.img} alt={s.title} className="svc-img" icon={s.icon} />
+      <h3>{s.title}</h3>
+      <p>{s.desc}</p>
+      <a href={`#/services/${s.id}`} className="more">
+        <Icon name="arrow" size={14} stroke={2.4} /> المزيد
+      </a>
+    </article>
+  );
 }
 
 function BookingForm({ preService = "" }) {
-const [form, setForm] = useState({ name: "", phone: "", service: preService, date: "" });
-const [errors, setErrors] = useState({});
-const setField = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const [form, setForm] = useState({ name: "", phone: "", service: preService, date: "" });
+  const [errors, setErrors] = useState({});
+  const setField = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
-const submit = (e) => {
-e.preventDefault();
-const err = {};
-if (form.name.trim().length < 3) err.name = "اكتب الاسم الكامل";
-if (!/^(+?966|0)?5\d{8}$/.test(form.phone.replace(/[\s-]/g, ""))) err.phone = "اكتب رقم جوال صحيح";
-if (!form.service) err.service = "اختر نوع الخدمة";
-setErrors(err);
-if (Object.keys(err).length) return;
-const msg =
-السلام عليكم، أرغب بحجز زيارة منزلية.\n +
-الاسم: ${form.name}\nالجوال: ${form.phone}\nالخدمة: ${form.service} +
-(form.date ? \nتاريخ الزيارة: ${form.date} : "");
-window.open(waLink(msg), "_blank", "noopener");
-};
+  const submit = (e) => {
+    e.preventDefault();
+    const err = {};
+    if (form.name.trim().length < 3) err.name = "اكتب الاسم الكامل";
+    if (!/^(\+?966|0)?5\d{8}$/.test(form.phone.replace(/[\s-]/g, ""))) err.phone = "اكتب رقم جوال صحيح";
+    if (!form.service) err.service = "اختر نوع الخدمة";
+    setErrors(err);
+    if (Object.keys(err).length) return;
+    const msg =
+      `السلام عليكم، أرغب بحجز زيارة منزلية.\n` +
+      `الاسم: ${form.name}\nالجوال: ${form.phone}\nالخدمة: ${form.service}` +
+      (form.date ? `\nتاريخ الزيارة: ${form.date}` : "");
+    window.open(waLink(msg), "_blank", "noopener");
+  };
 
-return (
-<form className="booking" onSubmit={submit} noValidate>
-<Photo src={IMAGES.booking} alt="" className="booking-img" icon="👩‍⚕️" bare />
-<div className="booking-body">
-<h2>احجز زيارتك الآن</h2>
-<p className="sub">املأ البيانات وسنتواصل معك في أقرب وقت</p>
+  return (
+    <form className="booking" onSubmit={submit} noValidate>
+      <Photo src={IMAGES.booking} alt="" className="booking-img" icon="👩‍⚕️" bare />
+      <div className="booking-body">
+        <h2>احجز زيارتك الآن</h2>
+        <p className="sub">املأ البيانات وسنتواصل معك في أقرب وقت</p>
 
-text
+        <label className={`field ${errors.name ? "err" : ""}`}>
+          <Icon name="user" size={18} />
+          <input value={form.name} onChange={setField("name")} placeholder="الاسم الكامل" autoComplete="name" />
+        </label>
+        {errors.name && <small className="msg">{errors.name}</small>}
 
-    <label className={`field ${errors.name ? "err" : ""}`}>
-      <Icon name="user" size={18} />
-      <input value={form.name} onChange={setField("name")} placeholder="الاسم الكامل" autoComplete="name" />
-    </label>
-    {errors.name && <small className="msg">{errors.name}</small>}
+        <label className={`field ${errors.phone ? "err" : ""}`}>
+          <Icon name="phone" size={18} />
+          <input value={form.phone} onChange={setField("phone")} placeholder="رقم الجوال" inputMode="tel" autoComplete="tel" dir="rtl" />
+        </label>
+        {errors.phone && <small className="msg">{errors.phone}</small>}
 
-    <label className={`field ${errors.phone ? "err" : ""}`}>
-      <Icon name="phone" size={18} />
-      <input value={form.phone} onChange={setField("phone")} placeholder="رقم الجوال" inputMode="tel" autoComplete="tel" dir="rtl" />
-    </label>
-    {errors.phone && <small className="msg">{errors.phone}</small>}
+        <label className={`field ${errors.service ? "err" : ""}`}>
+          <Icon name="field" size={18} />
+          <select value={form.service} onChange={setField("service")}>
+            <option value="">نوع الخدمة</option>
+            {SERVICE_OPTIONS.map((o) => <option key={o}>{o}</option>)}
+          </select>
+        </label>
+        {errors.service && <small className="msg">{errors.service}</small>}
 
-    <label className={`field ${errors.service ? "err" : ""}`}>
-      <Icon name="field" size={18} />
-      <select value={form.service} onChange={setField("service")}>
-        <option value="">نوع الخدمة</option>
-        {SERVICE_OPTIONS.map((o) => <option key={o}>{o}</option>)}
-      </select>
-    </label>
-    {errors.service && <small className="msg">{errors.service}</small>}
+        <label className="field">
+          <Icon name="calendar" size={18} />
+          <input type="date" value={form.date} onChange={setField("date")} aria-label="تاريخ الزيارة (اختياري)" />
+        </label>
 
-    <label className="field">
-      <Icon name="calendar" size={18} />
-      <input type="date" value={form.date} onChange={setField("date")} aria-label="تاريخ الزيارة (اختياري)" />
-    </label>
-
-    <button type="submit" className="btn-primary block">
-      <Icon name="send" size={18} /> ارسال الطلب
-    </button>
-  </div>
-</form>
-);
+        <button type="submit" className="btn-primary block">
+          <Icon name="send" size={18} /> ارسال الطلب
+        </button>
+      </div>
+    </form>
+  );
 }
 
 function AreasCard() {
-return (
-<div className="card areas">
-<h3 className="card-title"><Icon name="pin" size={22} /> مناطق الخدمة</h3>
-<p className="areas-sub">نخدم جميع مناطق المملكة وخصوصًا:</p>
-<div className="areas-grid">
-{AREAS.map((a) => (
-<div key={a.name} className="area">
-<Photo src={a.img} alt={a.name} className="area-img" icon="🕌" />
-<span>{a.name}</span>
-</div>
-))}
-</div>
-<p className="areas-foot"><Icon name="car" size={22} /> توفر الخدمة في جميع أنحاء المملكة</p>
-</div>
-);
+  return (
+    <div className="card areas">
+      <h3 className="card-title"><Icon name="pin" size={22} /> مناطق الخدمة</h3>
+      <p className="areas-sub">نخدم جميع مناطق المملكة وخصوصًا:</p>
+      <div className="areas-grid">
+        {AREAS.map((a) => (
+          <div key={a.name} className="area">
+            <Photo src={a.img} alt={a.name} className="area-img" icon="🕌" />
+            <span>{a.name}</span>
+          </div>
+        ))}
+      </div>
+      <p className="areas-foot"><Icon name="car" size={22} /> توفر الخدمة في جميع أنحاء المملكة</p>
+    </div>
+  );
 }
 
 /* ---------- الصفحة الرئيسية ---------- */
 function HomePage() {
-const [page, setPage] = useState(0);
-const pages = [REVIEWS.slice(0, 3), REVIEWS.slice(3, 6)];
-const toBooking = (e) => {
-e.preventDefault();
-document.getElementById("booking")?.scrollIntoView({ behavior: "smooth", block: "center" });
-};
+  const [page, setPage] = useState(0);
+  const pages = [REVIEWS.slice(0, 3), REVIEWS.slice(3, 6)];
+  const toBooking = (e) => {
+    e.preventDefault();
+    document.getElementById("booking")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
 
-return (
-<>
-<section className="hero">
-<Photo src={IMAGES.makkah} alt="" className="hero-bg" bare />
-<div className="container hero-in">
-<div className="hero-text">
-<h1>
-<span className="h-navy">رعاية طبية متخصصة</span>
-<span className="h-teal">في منزلك</span>
-</h1>
-<p>
-فريق تمريضي مؤهل ومدرب يقدم أفضل خدمات الرعاية الصحية
-<br />
-لأن راحتك وصحتك تهمنا
-</p>
-<div className="hero-cta">
-<a href="#booking" onClick={toBooking} className="btn-primary">
-<Icon name="calendar" size={20} /> احجز زيارة الآن
-</a>
-<a className="hero-wa" href={waLink()} target="_blank" rel="noopener noreferrer">
-<span className="wa-circle"><WhatsAppIcon size={26} /></span>
-<span className="hero-wa-t">
-<small>تواصل معنا على واتساب</small>
-<b dir="ltr">{PHONE_DISPLAY}</b>
-</span>
-</a>
-</div>
-</div>
-<div className="hero-areas">
-<span>نخدمكم في مكة</span>
-<span>جدة · الطائف</span>
-<span>وكل مناطق المملكة</span>
-<i />
-</div>
-</div>
-</section>
-
-text
-
-  <section className="strip">
-    <div className="container strip-in">
-      {TOP_FEATURES.map((f) => (
-        <div key={f.text} className="strip-item">
-          <span className="strip-ic"><Icon name={f.icon} size={24} /></span>
-          <span>{f.text}</span>
+  return (
+    <>
+      <section className="hero">
+        <Photo src={IMAGES.makkah} alt="" className="hero-bg" bare />
+        <div className="container hero-in">
+          <div className="hero-text">
+            <h1>
+              <span className="h-navy">رعاية طبية متخصصة</span>
+              <span className="h-teal">في منزلك</span>
+            </h1>
+            <p>
+              فريق تمريضي مؤهل ومدرب يقدم أفضل خدمات الرعاية الصحية
+              <br />
+              لأن راحتك وصحتك تهمنا
+            </p>
+            <div className="hero-cta">
+              <a href="#booking" onClick={toBooking} className="btn-primary">
+                <Icon name="calendar" size={20} /> احجز زيارة الآن
+              </a>
+              <a className="hero-wa" href={waLink()} target="_blank" rel="noopener noreferrer">
+                <span className="wa-circle"><WhatsAppIcon size={26} /></span>
+                <span className="hero-wa-t">
+                  <small>تواصل معنا على واتساب</small>
+                  <b dir="ltr">{PHONE_DISPLAY}</b>
+                </span>
+              </a>
+            </div>
+          </div>
+          <div className="hero-areas">
+            <span>نخدمكم في مكة</span>
+            <span>جدة · الطائف</span>
+            <span>وكل مناطق المملكة</span>
+            <i />
+          </div>
         </div>
-      ))}
-    </div>
-  </section>
+      </section>
 
-  <section className="section">
-    <div className="container">
-      <h2 className="sec-title"><span>خدماتنا</span></h2>
-      <div className="services">
-        {SERVICES.map((s) => <ServiceCard key={s.id} s={s} />)}
-      </div>
-      <p className="emergency">
-        🚑 زيارة منزلية طارئة حسب توفر الفريق —{" "}
-        <a href={`tel:${PHONE_TEL}`}>اتصل الآن <span dir="ltr">{PHONE_DISPLAY}</span></a>
-      </p>
-    </div>
-  </section>
-
-  <section id="booking" className="section tight">
-    <div className="container two-col">
-      <BookingForm />
-      <WhyBlock />
-    </div>
-  </section>
-
-  <section className="section tight">
-    <div className="container three-col">
-      <div className="card faq">
-        <h3 className="card-title"><Icon name="help" size={22} /> الأسئلة الشائعة</h3>
-        <FaqList items={FAQ.slice(0, 4)} />
-        <a href="#/faq" className="all-link">كل الأسئلة</a>
-      </div>
-
-      <div className="card reviews">
-        <h3 className="card-title"><Icon name="chat" size={22} /> آراء عملائنا</h3>
-        <div className="rv-grid">
-          {pages[page].map((r) => <ReviewCard key={r.name} r={r} />)}
-        </div>
-        <div className="dots">
-          {pages.map((_, i) => (
-            <button key={i} className={i === page ? "on" : ""} onClick={() => setPage(i)} aria-label={`الصفحة ${i + 1}`} />
+      <section className="strip">
+        <div className="container strip-in">
+          {TOP_FEATURES.map((f) => (
+            <div key={f.text} className="strip-item">
+              <span className="strip-ic"><Icon name={f.icon} size={24} /></span>
+              <span>{f.text}</span>
+            </div>
           ))}
         </div>
-        <a href="#/reviews" className="all-link">كل الآراء</a>
-      </div>
+      </section>
 
-      <AreasCard />
-    </div>
-  </section>
-</>
-);
+      <section className="section">
+        <div className="container">
+          <h2 className="sec-title"><span>خدماتنا</span></h2>
+          <div className="services">
+            {SERVICES.map((s) => <ServiceCard key={s.id} s={s} />)}
+          </div>
+          <p className="emergency">
+            🚑 زيارة منزلية طارئة حسب توفر الفريق —{" "}
+            <a href={`tel:${PHONE_TEL}`}>اتصل الآن <span dir="ltr">{PHONE_DISPLAY}</span></a>
+          </p>
+        </div>
+      </section>
+
+      <section id="booking" className="section tight">
+        <div className="container two-col">
+          <BookingForm />
+          <WhyBlock />
+        </div>
+      </section>
+
+      <section className="section tight">
+        <div className="container three-col">
+          <div className="card faq">
+            <h3 className="card-title"><Icon name="help" size={22} /> الأسئلة الشائعة</h3>
+            <FaqList items={FAQ.slice(0, 4)} />
+            <a href="#/faq" className="all-link">كل الأسئلة</a>
+          </div>
+
+          <div className="card reviews">
+            <h3 className="card-title"><Icon name="chat" size={22} /> آراء عملائنا</h3>
+            <div className="rv-grid">
+              {pages[page].map((r) => <ReviewCard key={r.name} r={r} />)}
+            </div>
+            <div className="dots">
+              {pages.map((_, i) => (
+                <button key={i} className={i === page ? "on" : ""} onClick={() => setPage(i)} aria-label={`الصفحة ${i + 1}`} />
+              ))}
+            </div>
+            <a href="#/reviews" className="all-link">كل الآراء</a>
+          </div>
+
+          <AreasCard />
+        </div>
+      </section>
+    </>
+  );
 }
 
 function WhyBlock() {
-return (
-<div className="why">
-<div className="why-body">
-<h2>لماذا مركز الأمل؟</h2>
-<p>
-نحن في مركز الأمل للتمريض المنزلي نؤمن بأن الرعاية الحقيقية تبدأ من المنزل. لذلك نقدم لك خدمات
-طبية وتمريضية متكاملة على يد فريق متخصص يهدف إلى راحتك وسلامتك.
-</p>
-<div className="why-grid">
-{WHY.map((w) => (
-<div key={w.title} className="why-item">
-<Icon name={w.icon} size={38} stroke={1.5} />
-<b>{w.title}</b>
-<span>{w.sub}</span>
-</div>
-))}
-</div>
-</div>
-<div className="why-photo">
-<Photo src={IMAGES.why} alt="" className="why-img" icon="🤲" bare />
-<div className="why-cap">
-لأنك تستحق
-<b>أفضل رعاية</b>
-</div>
-</div>
-</div>
-);
+  return (
+    <div className="why">
+      <div className="why-body">
+        <h2>لماذا مركز الأمل؟</h2>
+        <p>
+          نحن في مركز الأمل للتمريض المنزلي نؤمن بأن الرعاية الحقيقية تبدأ من المنزل. لذلك نقدم لك خدمات
+          طبية وتمريضية متكاملة على يد فريق متخصص يهدف إلى راحتك وسلامتك.
+        </p>
+        <div className="why-grid">
+          {WHY.map((w) => (
+            <div key={w.title} className="why-item">
+              <Icon name={w.icon} size={38} stroke={1.5} />
+              <b>{w.title}</b>
+              <span>{w.sub}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="why-photo">
+        <Photo src={IMAGES.why} alt="" className="why-img" icon="🤲" bare />
+        <div className="why-cap">
+          لأنك تستحق
+          <b>أفضل رعاية</b>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /* ---------- صفحة الخدمات ---------- */
 function ServicesPage() {
-return (
-<>
-<PageHead
-title="خدماتنا"
-sub="خدمات تمريضية وطبية متكاملة تصلك إلى باب منزلك في مكة وجدة والطائف وجميع مناطق المملكة."
-crumbs={[{ label: "خدماتنا" }]}
-/>
-<section className="section">
-<div className="container">
-<div className="services lg">
-{SERVICES.map((s) => <ServiceCard key={s.id} s={s} />)}
-</div>
-<div className="notice">
-<span className="notice-ic">🚑</span>
-<div>
-<b>زيارة منزلية طارئة</b>
-<p>متوفرة حسب توفر الفريق في منطقتك. اتصل بنا مباشرة لتأكيد أقرب موعد.</p>
-</div>
-<a className="btn-primary" href={tel:${PHONE_TEL}}>
-<Icon name="phone" size={18} /> <span dir="ltr">{PHONE_DISPLAY}</span>
-</a>
-</div>
-</div>
-</section>
-<CtaBand />
-</>
-);
+  return (
+    <>
+      <PageHead
+        title="خدماتنا"
+        sub="خدمات تمريضية وطبية متكاملة تصلك إلى باب منزلك في مكة وجدة والطائف وجميع مناطق المملكة."
+        crumbs={[{ label: "خدماتنا" }]}
+      />
+      <section className="section">
+        <div className="container">
+          <div className="services lg">
+            {SERVICES.map((s) => <ServiceCard key={s.id} s={s} />)}
+          </div>
+          <div className="notice">
+            <span className="notice-ic">🚑</span>
+            <div>
+              <b>زيارة منزلية طارئة</b>
+              <p>متوفرة حسب توفر الفريق في منطقتك. اتصل بنا مباشرة لتأكيد أقرب موعد.</p>
+            </div>
+            <a className="btn-primary" href={`tel:${PHONE_TEL}`}>
+              <Icon name="phone" size={18} /> <span dir="ltr">{PHONE_DISPLAY}</span>
+            </a>
+          </div>
+        </div>
+      </section>
+      <CtaBand />
+    </>
+  );
 }
 
 /* ---------- تفاصيل خدمة ---------- */
 function ServiceDetail({ id }) {
-const s = SERVICES.find((x) => x.id === id);
-if (!s) return <ServicesPage />;
-const others = SERVICES.filter((x) => x.id !== id).slice(0, 3);
-return (
-<>
-<PageHead
-title={s.title}
-sub={s.desc}
-crumbs={[{ label: "خدماتنا", to: "#/services" }, { label: s.title }]}
-/>
-<section className="section">
-<div className="container detail">
-<div className="detail-main">
-<Photo src={s.img} alt={s.title} className="detail-img" icon={s.icon} />
-<p className="lead">{s.long}</p>
+  const s = SERVICES.find((x) => x.id === id);
+  if (!s) return <ServicesPage />;
+  const others = SERVICES.filter((x) => x.id !== id).slice(0, 3);
+  return (
+    <>
+      <PageHead
+        title={s.title}
+        sub={s.desc}
+        crumbs={[{ label: "خدماتنا", to: "#/services" }, { label: s.title }]}
+      />
+      <section className="section">
+        <div className="container detail">
+          <div className="detail-main">
+            <Photo src={s.img} alt={s.title} className="detail-img" icon={s.icon} />
+            <p className="lead">{s.long}</p>
 
-text
+            <h2 className="h-sm">تشمل الخدمة</h2>
+            <ul className="checklist">
+              {s.includes.map((x) => (
+                <li key={x}>
+                  <span><Icon name="shield" size={18} /></span>
+                  {x}
+                </li>
+              ))}
+            </ul>
 
-        <h2 className="h-sm">تشمل الخدمة</h2>
-        <ul className="checklist">
-          {s.includes.map((x) => (
-            <li key={x}>
-              <span><Icon name="shield" size={18} /></span>
-              {x}
-            </li>
-          ))}
-        </ul>
+            <h2 className="h-sm">كيف تتم الزيارة</h2>
+            <ol className="steps">
+              {STEPS.map((st, i) => (
+                <li key={st.t}>
+                  <b>{i + 1}</b>
+                  <div>
+                    <h3>{st.t}</h3>
+                    <p>{st.d}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
 
-        <h2 className="h-sm">كيف تتم الزيارة</h2>
-        <ol className="steps">
-          {STEPS.map((st, i) => (
-            <li key={st.t}>
-              <b>{i + 1}</b>
-              <div>
-                <h3>{st.t}</h3>
-                <p>{st.d}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </div>
-
-      <aside className="detail-side">
-        <div className="side-card">
-          <h3>احجز هذه الخدمة</h3>
-          <p>أرسل طلبك وسنؤكد الموعد والسعر قبل الزيارة.</p>
-          <a
-            className="btn-wa block"
-            href={waLink(`السلام عليكم، أرغب بحجز خدمة: ${s.title}`)}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <WhatsAppIcon size={22} /> احجز عبر واتساب
-          </a>
-          <a className="btn-primary block" href={`tel:${PHONE_TEL}`}>
-            <Icon name="phone" size={18} /> <span dir="ltr">{PHONE_DISPLAY}</span>
-          </a>
+          <aside className="detail-side">
+            <div className="side-card">
+              <h3>احجز هذه الخدمة</h3>
+              <p>أرسل طلبك وسنؤكد الموعد والسعر قبل الزيارة.</p>
+              <a
+                className="btn-wa block"
+                href={waLink(`السلام عليكم، أرغب بحجز خدمة: ${s.title}`)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <WhatsAppIcon size={22} /> احجز عبر واتساب
+              </a>
+              <a className="btn-primary block" href={`tel:${PHONE_TEL}`}>
+                <Icon name="phone" size={18} /> <span dir="ltr">{PHONE_DISPLAY}</span>
+              </a>
+            </div>
+            <div className="side-card">
+              <h3>خدمات أخرى</h3>
+              <ul className="side-links">
+                {others.map((o) => (
+                  <li key={o.id}><a href={`#/services/${o.id}`}>{o.title}</a></li>
+                ))}
+              </ul>
+            </div>
+          </aside>
         </div>
-        <div className="side-card">
-          <h3>خدمات أخرى</h3>
-          <ul className="side-links">
-            {others.map((o) => (
-              <li key={o.id}><a href={`#/services/${o.id}`}>{o.title}</a></li>
-            ))}
-          </ul>
-        </div>
-      </aside>
-    </div>
-  </section>
-</>
-);
+      </section>
+    </>
+  );
 }
 
 /* ---------- من نحن ---------- */
 function AboutPage() {
-return (
-<>
-<PageHead
-title="من نحن"
-sub="مركز الأمل للتمريض المنزلي — رعايتك في بيتك، أمان لنا."
-crumbs={[{ label: "من نحن" }]}
-/>
-<section className="section">
-<div className="container about-grid">
-<div className="about-text">
-<h2 className="h-sm">رعاية حقيقية تبدأ من المنزل</h2>
-<p>
-نحن في مركز الأمل للتمريض المنزلي نؤمن بأن الرعاية الحقيقية تبدأ من المنزل. لذلك نقدم خدمات طبية
-وتمريضية متكاملة على يد فريق مؤهل ومدرب، هدفه راحة المريض وسلامته وطمأنينة أسرته.
-</p>
-<p>
-نخدم مكة المكرمة وجدة والطائف، ونصل إلى جميع مناطق المملكة حسب التوفر، بتواصل دائم وأسعار واضحة.
-</p>
-<div className="mv">
-<div>
-<h3>رسالتنا</h3>
-<p>تقديم رعاية تمريضية آمنة وإنسانية في المنزل تحفظ راحة المريض وكرامته.</p>
-</div>
-<div>
-<h3>رؤيتنا</h3>
-<p>أن نكون الخيار الأول للأسر التي تبحث عن رعاية منزلية موثوقة في المملكة.</p>
-</div>
-</div>
-</div>
-<div className="about-photo">
-<Photo src={IMAGES.why} alt="" className="about-img" icon="🤲" />
-</div>
-</div>
-</section>
-
-text
-
-  <section className="section tight">
-    <div className="container">
-      <h2 className="sec-title"><span>قيمنا</span></h2>
-      <div className="values">
-        {WHY.map((w) => (
-          <div key={w.title} className="value">
-            <Icon name={w.icon} size={40} stroke={1.5} />
-            <b>{w.title} {w.sub}</b>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <section className="section tight">
-    <div className="container">
-      <h2 className="sec-title"><span>كيف نعمل</span></h2>
-      <ol className="steps row">
-        {STEPS.map((st, i) => (
-          <li key={st.t}>
-            <b>{i + 1}</b>
-            <div>
-              <h3>{st.t}</h3>
-              <p>{st.d}</p>
+  return (
+    <>
+      <PageHead
+        title="من نحن"
+        sub="مركز الأمل للتمريض المنزلي — رعايتك في بيتك، أمان لنا."
+        crumbs={[{ label: "من نحن" }]}
+      />
+      <section className="section">
+        <div className="container about-grid">
+          <div className="about-text">
+            <h2 className="h-sm">رعاية حقيقية تبدأ من المنزل</h2>
+            <p>
+              نحن في مركز الأمل للتمريض المنزلي نؤمن بأن الرعاية الحقيقية تبدأ من المنزل. لذلك نقدم خدمات طبية
+              وتمريضية متكاملة على يد فريق مؤهل ومدرب، هدفه راحة المريض وسلامته وطمأنينة أسرته.
+            </p>
+            <p>
+              نخدم مكة المكرمة وجدة والطائف، ونصل إلى جميع مناطق المملكة حسب التوفر، بتواصل دائم وأسعار واضحة.
+            </p>
+            <div className="mv">
+              <div>
+                <h3>رسالتنا</h3>
+                <p>تقديم رعاية تمريضية آمنة وإنسانية في المنزل تحفظ راحة المريض وكرامته.</p>
+              </div>
+              <div>
+                <h3>رؤيتنا</h3>
+                <p>أن نكون الخيار الأول للأسر التي تبحث عن رعاية منزلية موثوقة في المملكة.</p>
+              </div>
             </div>
-          </li>
-        ))}
-      </ol>
-    </div>
-  </section>
+          </div>
+          <div className="about-photo">
+            <Photo src={IMAGES.why} alt="" className="about-img" icon="🤲" />
+          </div>
+        </div>
+      </section>
 
-  <section className="section tight">
-    <div className="container"><AreasCard /></div>
-  </section>
-  <CtaBand />
-</>
-);
+      <section className="section tight">
+        <div className="container">
+          <h2 className="sec-title"><span>قيمنا</span></h2>
+          <div className="values">
+            {WHY.map((w) => (
+              <div key={w.title} className="value">
+                <Icon name={w.icon} size={40} stroke={1.5} />
+                <b>{w.title} {w.sub}</b>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section tight">
+        <div className="container">
+          <h2 className="sec-title"><span>كيف نعمل</span></h2>
+          <ol className="steps row">
+            {STEPS.map((st, i) => (
+              <li key={st.t}>
+                <b>{i + 1}</b>
+                <div>
+                  <h3>{st.t}</h3>
+                  <p>{st.d}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section className="section tight">
+        <div className="container"><AreasCard /></div>
+      </section>
+      <CtaBand />
+    </>
+  );
 }
 
 /* ---------- آراء العملاء ---------- */
 function ReviewsPage() {
-return (
-<>
-<PageHead
-title="آراء عملائنا"
-sub="ثقتكم هي أكبر دافع لنا لتقديم الأفضل."
-crumbs={[{ label: "آراء العملاء" }]}
-/>
-<section className="section">
-<div className="container">
-<div className="rv-grid full">
-{REVIEWS.map((r) => <ReviewCard key={r.name} r={r} />)}
-</div>
-</div>
-</section>
-<CtaBand text="جرّب الخدمة بنفسك" />
-</>
-);
+  return (
+    <>
+      <PageHead
+        title="آراء عملائنا"
+        sub="ثقتكم هي أكبر دافع لنا لتقديم الأفضل."
+        crumbs={[{ label: "آراء العملاء" }]}
+      />
+      <section className="section">
+        <div className="container">
+          <div className="rv-grid full">
+            {REVIEWS.map((r) => <ReviewCard key={r.name} r={r} />)}
+          </div>
+        </div>
+      </section>
+      <CtaBand text="جرّب الخدمة بنفسك" />
+    </>
+  );
 }
 
 /* ---------- الأسئلة الشائعة ---------- */
 function FaqPage() {
-return (
-<>
-<PageHead
-title="الأسئلة الشائعة"
-sub="إجابات سريعة على أكثر ما يسأل عنه عملاؤنا."
-crumbs={[{ label: "الأسئلة الشائعة" }]}
-/>
-<section className="section">
-<div className="container narrow">
-<div className="card faq page">
-<FaqList items={FAQ} />
-</div>
-<p className="emergency">
-لم تجد إجابتك؟{" "}
-<a href={waLink("السلام عليكم، لدي استفسار")} target="_blank" rel="noopener noreferrer">
-راسلنا على واتساب
-</a>
-</p>
-</div>
-</section>
-</>
-);
+  return (
+    <>
+      <PageHead
+        title="الأسئلة الشائعة"
+        sub="إجابات سريعة على أكثر ما يسأل عنه عملاؤنا."
+        crumbs={[{ label: "الأسئلة الشائعة" }]}
+      />
+      <section className="section">
+        <div className="container narrow">
+          <div className="card faq page">
+            <FaqList items={FAQ} />
+          </div>
+          <p className="emergency">
+            لم تجد إجابتك؟{" "}
+            <a href={waLink("السلام عليكم، لدي استفسار")} target="_blank" rel="noopener noreferrer">
+              راسلنا على واتساب
+            </a>
+          </p>
+        </div>
+      </section>
+    </>
+  );
 }
 
 /* ---------- تواصل معنا ---------- */
 function ContactPage() {
-return (
-<>
-<PageHead
-title="تواصل معنا"
-sub="نرد على رسائلك في أقرب وقت. الخدمة متوفرة على مدار الساعة."
-crumbs={[{ label: "تواصل معنا" }]}
-/>
-<section className="section">
-<div className="container contact-grid">
-<div className="contact-cards">
-<a className="c-card" href={waLink()} target="_blank" rel="noopener noreferrer">
-<span className="c-ic wa"><WhatsAppIcon size={28} /></span>
-<span>
-<b>واتساب</b>
-<small dir="ltr">{PHONE_DISPLAY}</small>
-</span>
-</a>
-<a className="c-card" href={tel:${PHONE_TEL}}>
-<span className="c-ic"><Icon name="phone" size={26} /></span>
-<span>
-<b>اتصال مباشر</b>
-<small dir="ltr">{PHONE_DISPLAY}</small>
-</span>
-</a>
-<div className="c-card">
-<span className="c-ic"><Icon name="pin" size={26} /></span>
-<span>
-<b>مناطق الخدمة</b>
-<small>مكة المكرمة - جدة - الطائف وجميع مناطق المملكة</small>
-</span>
-</div>
-<div className="c-card">
-<span className="c-ic"><Icon name="clock" size={26} /></span>
-<span>
-<b>ساعات العمل</b>
-<small>متوفر على مدار الساعة</small>
-</span>
-</div>
-</div>
-<BookingForm />
-</div>
-</section>
-</>
-);
+  return (
+    <>
+      <PageHead
+        title="تواصل معنا"
+        sub="نرد على رسائلك في أقرب وقت. الخدمة متوفرة على مدار الساعة."
+        crumbs={[{ label: "تواصل معنا" }]}
+      />
+      <section className="section">
+        <div className="container contact-grid">
+          <div className="contact-cards">
+            <a className="c-card" href={waLink()} target="_blank" rel="noopener noreferrer">
+              <span className="c-ic wa"><WhatsAppIcon size={28} /></span>
+              <span>
+                <b>واتساب</b>
+                <small dir="ltr">{PHONE_DISPLAY}</small>
+              </span>
+            </a>
+            <a className="c-card" href={`tel:${PHONE_TEL}`}>
+              <span className="c-ic"><Icon name="phone" size={26} /></span>
+              <span>
+                <b>اتصال مباشر</b>
+                <small dir="ltr">{PHONE_DISPLAY}</small>
+              </span>
+            </a>
+            <div className="c-card">
+              <span className="c-ic"><Icon name="pin" size={26} /></span>
+              <span>
+                <b>مناطق الخدمة</b>
+                <small>مكة المكرمة - جدة - الطائف وجميع مناطق المملكة</small>
+              </span>
+            </div>
+            <div className="c-card">
+              <span className="c-ic"><Icon name="clock" size={26} /></span>
+              <span>
+                <b>ساعات العمل</b>
+                <small>متوفر على مدار الساعة</small>
+              </span>
+            </div>
+          </div>
+          <BookingForm />
+        </div>
+      </section>
+    </>
+  );
 }
 
 /* ---------- التطبيق ---------- */
 export default function AlAmalHomeNursing() {
-const route = useRoute();
-const [menuOpen, setMenuOpen] = useState(false);
+  const route = useRoute();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-useEffect(() => setMenuOpen(false), [route]);
+  useEffect(() => setMenuOpen(false), [route]);
 
-const isActive = (to) => (to === "/" ? route === "/" : route.startsWith(to));
+  const isActive = (to) => (to === "/" ? route === "/" : route.startsWith(to));
 
-let page;
-if (route === "/services") page = <ServicesPage />;
-else if (route.startsWith("/services/")) page = <ServiceDetail id={route.split("/")[2]} />;
-else if (route === "/about") page = <AboutPage />;
-else if (route === "/reviews") page = <ReviewsPage />;
-else if (route === "/faq") page = <FaqPage />;
-else if (route === "/contact") page = <ContactPage />;
-else page = <HomePage />;
+  let page;
+  if (route === "/services") page = <ServicesPage />;
+  else if (route.startsWith("/services/")) page = <ServiceDetail id={route.split("/")[2]} />;
+  else if (route === "/about") page = <AboutPage />;
+  else if (route === "/reviews") page = <ReviewsPage />;
+  else if (route === "/faq") page = <FaqPage />;
+  else if (route === "/contact") page = <ContactPage />;
+  else page = <HomePage />;
 
-return (
-<div className="am" dir="rtl" lang="ar">
-<style>{CSS}</style>
+  return (
+    <div className="am" dir="rtl" lang="ar">
+      <style>{CSS}</style>
 
-text
-
-  <header className="header">
-    <div className="container header-in">
-      <a href="#/" className="brand" aria-label="الصفحة الرئيسية">
-        <Logo size={52} />
-      </a>
-
-      <nav className={`nav ${menuOpen ? "open" : ""}`} aria-label="القائمة الرئيسية">
-        {NAV.map((n) => (
-          <a key={n.to} href={`#${n.to}`} className={isActive(n.to) ? "active" : ""}>
-            {n.label}
+      <header className="header">
+        <div className="container header-in">
+          <a href="#/" className="brand" aria-label="الصفحة الرئيسية">
+            <Logo size={52} />
           </a>
-        ))}
-        <a className="nav-wa" href={waLink()} target="_blank" rel="noopener noreferrer">
-          <WhatsAppIcon size={20} /> {PHONE_DISPLAY}
-        </a>
-      </nav>
 
-      <div className="header-end">
-        <span className="lang" title="اللغة">
-          <Icon name="globe" size={16} /> AR <Icon name="chevron" size={14} />
-        </span>
-        <a className="wa-pill" href={waLink()} target="_blank" rel="noopener noreferrer">
-          <WhatsAppIcon size={22} />
-          <span dir="ltr">{PHONE_DISPLAY}</span>
-        </a>
-        <button className="burger" onClick={() => setMenuOpen((v) => !v)} aria-label="القائمة" aria-expanded={menuOpen}>
-          <Icon name={menuOpen ? "close" : "menu"} size={26} />
-        </button>
-      </div>
-    </div>
-  </header>
+          <nav className={`nav ${menuOpen ? "open" : ""}`} aria-label="القائمة الرئيسية">
+            {NAV.map((n) => (
+              <a key={n.to} href={`#${n.to}`} className={isActive(n.to) ? "active" : ""}>
+                {n.label}
+              </a>
+            ))}
+            <a className="nav-wa" href={waLink()} target="_blank" rel="noopener noreferrer">
+              <WhatsAppIcon size={20} /> {PHONE_DISPLAY}
+            </a>
+          </nav>
 
-  <main>{page}</main>
-
-  <footer className="footer">
-    <div className="container footer-in">
-      <div className="f-col f-brand">
-        <Logo size={58} light />
-      </div>
-      <a className="f-col f-item" href={waLink()} target="_blank" rel="noopener noreferrer">
-        <span className="f-ic wa"><WhatsAppIcon size={30} /></span>
-        <span>
-          <b dir="ltr">{PHONE_DISPLAY}</b>
-          <small>تواصل معنا على واتساب</small>
-        </span>
-      </a>
-      <div className="f-col f-item">
-        <span className="f-ic"><Icon name="pin" size={28} /></span>
-        <span>
-          <b>مكة المكرمة - جدة - الطائف</b>
-          <small>و جميع مناطق المملكة</small>
-        </span>
-      </div>
-      <div className="f-col f-social">
-        <div className="socials">
-          {["X", "in", "👻", "♪"].map((s, i) => (
-            <a key={i} href="#/" aria-label="تواصل اجتماعي" onClick={(e) => e.preventDefault()}>{s}</a>
-          ))}
+          <div className="header-end">
+            <span className="lang" title="اللغة">
+              <Icon name="globe" size={16} /> AR <Icon name="chevron" size={14} />
+            </span>
+            <a className="wa-pill" href={waLink()} target="_blank" rel="noopener noreferrer">
+              <WhatsAppIcon size={22} />
+              <span dir="ltr">{PHONE_DISPLAY}</span>
+            </a>
+            <button className="burger" onClick={() => setMenuOpen((v) => !v)} aria-label="القائمة" aria-expanded={menuOpen}>
+              <Icon name={menuOpen ? "close" : "menu"} size={26} />
+            </button>
+          </div>
         </div>
-        <small>جميع الحقوق محفوظة © {new Date().getFullYear()} مركز الأمل للتمريض المنزلي</small>
+      </header>
+
+      <main>{page}</main>
+
+      <footer className="footer">
+        <div className="container footer-in">
+          <div className="f-col f-brand">
+            <Logo size={58} light />
+          </div>
+          <a className="f-col f-item" href={waLink()} target="_blank" rel="noopener noreferrer">
+            <span className="f-ic wa"><WhatsAppIcon size={30} /></span>
+            <span>
+              <b dir="ltr">{PHONE_DISPLAY}</b>
+              <small>تواصل معنا على واتساب</small>
+            </span>
+          </a>
+          <div className="f-col f-item">
+            <span className="f-ic"><Icon name="pin" size={28} /></span>
+            <span>
+              <b>مكة المكرمة - جدة - الطائف</b>
+              <small>و جميع مناطق المملكة</small>
+            </span>
+          </div>
+          <div className="f-col f-social">
+            <div className="socials">
+              {["X", "in", "👻", "♪"].map((s, i) => (
+                <a key={i} href="#/" aria-label="تواصل اجتماعي" onClick={(e) => e.preventDefault()}>{s}</a>
+              ))}
+            </div>
+            <small>جميع الحقوق محفوظة © {new Date().getFullYear()} مركز الأمل للتمريض المنزلي</small>
+          </div>
+        </div>
+      </footer>
+
+      <div className="float">
+        <a className="float-call" href={`tel:${PHONE_TEL}`} aria-label="اتصال مباشر">
+          <Icon name="phone" size={24} />
+        </a>
+        <a className="float-wa" href={waLink("السلام عليكم، أرغب بالاستفسار عن خدمات التمريض المنزلي")} target="_blank" rel="noopener noreferrer" aria-label="واتساب">
+          <WhatsAppIcon size={32} />
+        </a>
       </div>
     </div>
-  </footer>
-
-  <div className="float">
-    <a className="float-call" href={`tel:${PHONE_TEL}`} aria-label="اتصال مباشر">
-      <Icon name="phone" size={24} />
-    </a>
-    <a className="float-wa" href={waLink("السلام عليكم، أرغب بالاستفسار عن خدمات التمريض المنزلي")} target="_blank" rel="noopener noreferrer" aria-label="واتساب">
-      <WhatsAppIcon size={32} />
-    </a>
-  </div>
-</div>
-);
+  );
 }
 
 /* ============================================================
-CSS
-============================================================ */
+   CSS
+   ============================================================ */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
 
 .am{
---navy:#0b3b6b; --navy-2:#0a2e55; --teal:#0e9aa7; --blue:#1d6fd1;
---sky:#eaf5fc; --sky-2:#f4f9fd; --line:#e3edf5; --ink:#1f2f42; --mut:#5f7186;
---wa:#22c55e; --radius:14px;
-font-family:'Cairo','Segoe UI',Tahoma,sans-serif; color:var(--ink);
-background:#fff; line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  --navy:#0b3b6b; --navy-2:#0a2e55; --teal:#0e9aa7; --blue:#1d6fd1;
+  --sky:#eaf5fc; --sky-2:#f4f9fd; --line:#e3edf5; --ink:#1f2f42; --mut:#5f7186;
+  --wa:#22c55e; --radius:14px;
+  font-family:'Cairo','Segoe UI',Tahoma,sans-serif; color:var(--ink);
+  background:#fff; line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:hidden;
 }
 .am *{box-sizing:border-box}
 .am a{color:inherit;text-decoration:none}
@@ -947,7 +948,7 @@ background:#fff; line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x
 /* hero */
 .am .hero{position:relative;background:linear-gradient(270deg,#f2f8fd 0%,#eaf5fc 45%,#fff 100%);overflow:hidden}
 .am .hero-bg{position:absolute;inset:0 0 0 auto;width:46%;height:100%;object-fit:cover;opacity:.55;
--webkit-mask-image:linear-gradient(to left,#000 30%,transparent);mask-image:linear-gradient(to left,#000 30%,transparent)}
+  -webkit-mask-image:linear-gradient(to left,#000 30%,transparent);mask-image:linear-gradient(to left,#000 30%,transparent)}
 .am .hero-in{position:relative;display:grid;grid-template-columns:1fr;align-items:center;min-height:330px}
 .am .hero-text{padding:40px 0;max-width:600px}
 .am .hero h1{font-weight:800;line-height:1.25;margin-bottom:12px}
@@ -1067,62 +1068,62 @@ background:#fff; line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x
 .am .float-wa{background:var(--wa)}
 .am .float-call{background:var(--navy)}
 @media (prefers-reduced-motion:no-preference){
-.am .float-wa{animation:am-pulse 2.6s ease-out 1}
+  .am .float-wa{animation:am-pulse 2.6s ease-out 1}
 }
 @keyframes am-pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6)}100%{box-shadow:0 0 0 22px rgba(34,197,94,0)}}
 
 /* ---------- تابلت ---------- */
 @media (max-width:1100px){
-.am .services{grid-template-columns:repeat(3,1fr)}
-.am .two-col{grid-template-columns:1fr}
-.am .three-col{grid-template-columns:1fr 1fr}
-.am .reviews{order:-1;grid-column:1/-1}
-.am .footer-in{grid-template-columns:1fr 1fr}
-.am .f-social{align-items:flex-start}
+  .am .services{grid-template-columns:repeat(3,1fr)}
+  .am .two-col{grid-template-columns:1fr}
+  .am .three-col{grid-template-columns:1fr 1fr}
+  .am .reviews{order:-1;grid-column:1/-1}
+  .am .footer-in{grid-template-columns:1fr 1fr}
+  .am .f-social{align-items:flex-start}
 }
 
 /* ---------- موبايل ---------- */
 @media (max-width:820px){
-.am .container{padding:0 16px}
-.am .header-in{height:66px;gap:12px}
-.am .lang,.am .wa-pill{display:none}
-.am .burger{display:block}
-.am .header-end{margin-inline-start:auto}
-.am .nav{position:absolute;inset-inline:0;top:66px;background:#fff;flex-direction:column;align-items:stretch;gap:0;margin:0;padding:8px 16px 16px;border-bottom:1px solid var(--line);box-shadow:0 14px 24px rgba(11,59,107,.1);display:none}
-.am .nav.open{display:flex}
-.am .nav a{padding:12px 4px;border-bottom:1px solid var(--line)}
-.am .nav-wa{display:inline-flex!important;align-items:center;gap:8px;justify-content:center;background:var(--wa);color:#fff!important;border-radius:999px!important;margin-top:12px;border:0!important}
-.am .logo-text b{font-size:1.25rem}
-.am .logo-text span{font-size:.85rem}
-.am .logo-text em{font-size:.62rem}
+  .am .container{padding:0 16px}
+  .am .header-in{height:66px;gap:12px}
+  .am .lang,.am .wa-pill{display:none}
+  .am .burger{display:block}
+  .am .header-end{margin-inline-start:auto}
+  .am .nav{position:absolute;inset-inline:0;top:66px;background:#fff;flex-direction:column;align-items:stretch;gap:0;margin:0;padding:8px 16px 16px;border-bottom:1px solid var(--line);box-shadow:0 14px 24px rgba(11,59,107,.1);display:none}
+  .am .nav.open{display:flex}
+  .am .nav a{padding:12px 4px;border-bottom:1px solid var(--line)}
+  .am .nav-wa{display:inline-flex!important;align-items:center;gap:8px;justify-content:center;background:var(--wa);color:#fff!important;border-radius:999px!important;margin-top:12px;border:0!important}
+  .am .logo-text b{font-size:1.25rem}
+  .am .logo-text span{font-size:.85rem}
+  .am .logo-text em{font-size:.62rem}
 
-.am .hero-in{min-height:0}
-.am .hero-areas{position:static;transform:none;flex-direction:row;flex-wrap:wrap;justify-content:center;gap:6px 12px;padding-bottom:22px;font-size:.9rem}
-.am .hero-areas i{display:none}
-.am .hero-text{padding:22px 0 30px;text-align:center;margin-inline:auto}
-.am .hero-cta{justify-content:center;flex-direction:column;gap:16px}
-.am .btn-primary{width:100%}
-.am .hero-bg{width:100%;opacity:.25}
+  .am .hero-in{min-height:0}
+  .am .hero-areas{position:static;transform:none;flex-direction:row;flex-wrap:wrap;justify-content:center;gap:6px 12px;padding-bottom:22px;font-size:.9rem}
+  .am .hero-areas i{display:none}
+        .am .hero-text{padding:22px 0 30px;text-align:center;margin-inline:auto}
+  .am .hero-cta{justify-content:center;flex-direction:column;gap:16px}
+  .am .btn-primary{width:100%}
+  .am .hero-bg{width:100%;opacity:.25}
 
-.am .strip-in{grid-template-columns:1fr 1fr;gap:10px}
-.am .strip-item{justify-content:flex-start;font-size:.8rem}
-.am .strip-ic{width:38px;height:38px}
-.am .services{grid-template-columns:1fr 1fr;gap:12px}
-.am .booking{flex-direction:column}
-.am .booking-img{width:100%;height:190px}
-.am .why{flex-direction:column-reverse}
-.am .why-photo{width:100%;height:190px}
-.am .why-grid{grid-template-columns:1fr 1fr;row-gap:18px}
-.am .why-item:nth-child(3){border-inline-start:0}
-.am .three-col{grid-template-columns:1fr}
-.am .rv-grid{grid-template-columns:1fr}
-.am .footer-in{grid-template-columns:1fr;gap:18px;text-align:start}
-.am .f-social{align-items:flex-start}
-.am .float{bottom:14px;inset-inline-start:12px}
-.am .float a{width:52px;height:52px}
+  .am .strip-in{grid-template-columns:1fr 1fr;gap:10px}
+  .am .strip-item{justify-content:flex-start;font-size:.8rem}
+  .am .strip-ic{width:38px;height:38px}
+  .am .services{grid-template-columns:1fr 1fr;gap:12px}
+  .am .booking{flex-direction:column}
+  .am .booking-img{width:100%;height:190px}
+  .am .why{flex-direction:column-reverse}
+  .am .why-photo{width:100%;height:190px}
+  .am .why-grid{grid-template-columns:1fr 1fr;row-gap:18px}
+  .am .why-item:nth-child(3){border-inline-start:0}
+  .am .three-col{grid-template-columns:1fr}
+  .am .rv-grid{grid-template-columns:1fr}
+  .am .footer-in{grid-template-columns:1fr;gap:18px;text-align:start}
+  .am .f-social{align-items:flex-start}
+  .am .float{bottom:14px;inset-inline-start:12px}
+  .am .float a{width:52px;height:52px}
 }
 @media (max-width:420px){
-.am .services{grid-template-columns:1fr}
+  .am .services{grid-template-columns:1fr}
 }
 
 /* ===== صفحات داخلية ===== */
@@ -1208,23 +1209,23 @@ background:#fff; line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x
 .am .c-card small{color:var(--mut);font-size:.88rem}
 
 @media (max-width:1100px){
-.am .detail{grid-template-columns:1fr}
-.am .detail-side{position:static}
-.am .steps.row{grid-template-columns:1fr 1fr}
-.am .values{grid-template-columns:1fr 1fr}
-.am .contact-grid,.am .about-grid{grid-template-columns:1fr}
-.am .rv-grid.full{grid-template-columns:1fr 1fr}
+  .am .detail{grid-template-columns:1fr}
+  .am .detail-side{position:static}
+  .am .steps.row{grid-template-columns:1fr 1fr}
+  .am .values{grid-template-columns:1fr 1fr}
+  .am .contact-grid,.am .about-grid{grid-template-columns:1fr}
+  .am .rv-grid.full{grid-template-columns:1fr 1fr}
 }
 @media (max-width:820px){
-.am .services.lg{grid-template-columns:1fr 1fr}
-.am .checklist,.am .mv,.am .steps.row,.am .rv-grid.full{grid-template-columns:1fr}
-.am .notice{flex-direction:column;align-items:flex-start}
-.am .notice .btn-primary{width:100%}
-.am .cta-in{flex-direction:column;align-items:flex-start}
-.am .detail-img,.am .detail-main .photo-fallback{height:200px}
-.am .about-img,.am .about-photo .photo-fallback{height:220px}
+  .am .services.lg{grid-template-columns:1fr 1fr}
+  .am .checklist,.am .mv,.am .steps.row,.am .rv-grid.full{grid-template-columns:1fr}
+  .am .notice{flex-direction:column;align-items:flex-start}
+  .am .notice .btn-primary{width:100%}
+  .am .cta-in{flex-direction:column;align-items:flex-start}
+  .am .detail-img,.am .detail-main .photo-fallback{height:200px}
+  .am .about-img,.am .about-photo .photo-fallback{height:220px}
 }
 @media (max-width:420px){
-.am .services.lg{grid-template-columns:1fr}
+  .am .services.lg{grid-template-columns:1fr}
 }
 `;
