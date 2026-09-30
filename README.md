@@ -28,3 +28,4 @@ npm run preview
 2. من Settings ← Pages ← Source اختر **GitHub Actions**.
 3. أي push على `main` ينشر الموقع تلقائيًا.
 "# EL-AMl" 
+"# EL-AMl" 
