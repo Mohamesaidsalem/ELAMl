@@ -27,3 +27,4 @@ npm run preview
 1. ارفع المشروع على GitHub (فرع `main`).
 2. من Settings ← Pages ← Source اختر **GitHub Actions**.
 3. أي push على `main` ينشر الموقع تلقائيًا.
+"# EL-AMl" 
