@@ -29,3 +29,4 @@ npm run preview
 3. أي push على `main` ينشر الموقع تلقائيًا.
 "# EL-AMl" 
 "# EL-AMl" 
+"# ELAMl" 
